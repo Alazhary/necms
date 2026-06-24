@@ -2,18 +2,38 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using NECMS.API.Data;
 using NECMS.API.Models;
 using NECMS.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var usePostgres = false;
+var pgConn = builder.Configuration.GetConnectionString("DefaultConnection");
+try
+{
+    using var testConn = new NpgsqlConnection(pgConn);
+    testConn.Open();
+    testConn.Close();
+    usePostgres = true;
+    Console.WriteLine("✓ PostgreSQL متاح");
+}
+catch
+{
+    Console.WriteLine("⚠ PostgreSQL غير متاح - سيتم استخدام SQLite محلياً");
+}
+
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? "Data Source=neems.db"));
+{
+    if (usePostgres)
+        options.UseNpgsql(pgConn);
+    else
+        options.UseSqlite("Data Source=NECMS.db");
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -46,25 +66,35 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+try
 {
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    context.Database.EnsureCreated();
-
-    if (!context.Users.Any())
+    using (var scope = app.Services.CreateScope())
     {
-        var adminUser = new User
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        context.Database.EnsureCreated();
+
+        if (!context.Users.Any())
         {
-            Username = "admin",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
-            FullName = "مدير النظام",
-            RoleId = 1,
-            IsActive = true,
-            CreatedDate = DateTime.UtcNow
-        };
-        context.Users.Add(adminUser);
-        context.SaveChanges();
+            var adminUser = new User
+            {
+                Username = "admin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                FullName = "مدير النظام",
+                RoleId = 1,
+                IsActive = true,
+                CreatedDate = DateTime.UtcNow
+            };
+            context.Users.Add(adminUser);
+            context.SaveChanges();
+        }
+
+        Console.WriteLine("✓ تم الاتصال بقاعدة البيانات بنجاح");
     }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"⚠ تعذر الاتصال بقاعدة البيانات: {ex.Message}");
+    Console.WriteLine("⚠ سيتم تشغيل السيرفر ولكن قاعدة البيانات غير متاحة");
 }
 
 if (app.Environment.IsDevelopment())
