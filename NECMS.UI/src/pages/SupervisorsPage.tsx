@@ -5,10 +5,10 @@ import {
   IconButton, CircularProgress
 } from '@mui/material';
 import { Add, Edit, Delete } from '../icons';
-import { supervisorService, type SupervisorDto } from '../services/supervisorService';
+import { supervisorService } from '../services/supervisorService';
 
 export default function SupervisorsPage() {
-  const [supervisors, setSupervisors] = useState<SupervisorDto[]>([]);
+  const [supervisors, setSupervisors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<Partial<any>>({});
@@ -17,7 +17,7 @@ export default function SupervisorsPage() {
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
-    try { const res = await supervisorService.getAll(); setSupervisors(res); }
+    try { setSupervisors(await supervisorService.getAll()); }
     catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
@@ -35,7 +35,7 @@ export default function SupervisorsPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('هل أنت متأكد من حذف هذه المشرفة؟')) {
+    if (window.confirm('هل أنت متأكد من حذف هذا المشرف؟')) {
       await supervisorService.delete(id);
       loadData();
     }
@@ -57,16 +57,14 @@ export default function SupervisorsPage() {
             <TableRow>
               <TableCell>الاسم</TableCell>
               <TableCell>رقم التليفون</TableCell>
-              <TableCell>الراتب</TableCell>
               <TableCell>الإجراءات</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {supervisors.map((s) => (
+            {supervisors.map((s: any) => (
               <TableRow key={s.id}>
                 <TableCell>{s.fullName}</TableCell>
-                <TableCell>{s.phone}</TableCell>
-                <TableCell>{s.salary} ج.م</TableCell>
+                <TableCell>{s.phone || '---'}</TableCell>
                 <TableCell>
                   <IconButton onClick={() => { setEditItem(s); setIsEditing(true); setOpen(true); }}><Edit /></IconButton>
                   <IconButton onClick={() => handleDelete(s.id)}><Delete /></IconButton>
@@ -74,7 +72,7 @@ export default function SupervisorsPage() {
               </TableRow>
             ))}
             {supervisors.length === 0 && (
-              <TableRow><TableCell colSpan={4} sx={{ textAlign: 'center' }}>لا يوجد مشرفات</TableCell></TableRow>
+              <TableRow><TableCell colSpan={3} sx={{ textAlign: 'center' }}>لا يوجد مشرفات</TableCell></TableRow>
             )}
           </TableBody>
         </Table>
@@ -88,10 +86,6 @@ export default function SupervisorsPage() {
               onChange={(e) => setEditItem({ ...editItem, fullName: e.target.value })} dir="rtl" />
             <TextField label="رقم التليفون" value={editItem.phone || ''}
               onChange={(e) => setEditItem({ ...editItem, phone: e.target.value })} dir="rtl" />
-            <TextField label="العنوان" value={editItem.address || ''}
-              onChange={(e) => setEditItem({ ...editItem, address: e.target.value })} dir="rtl" />
-            <TextField label="الراتب" type="number" value={editItem.salary || ''}
-              onChange={(e) => setEditItem({ ...editItem, salary: parseFloat(e.target.value) })} />
           </Box>
         </DialogContent>
         <DialogActions>

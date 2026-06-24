@@ -5,10 +5,10 @@ import {
   IconButton, CircularProgress
 } from '@mui/material';
 import { Add, Edit, Delete } from '../icons';
-import { teacherService, type TeacherDto } from '../services/teacherService';
+import { teacherService } from '../services/teacherService';
 
 export default function TeachersPage() {
-  const [teachers, setTeachers] = useState<TeacherDto[]>([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<Partial<any>>({});
@@ -17,10 +17,8 @@ export default function TeachersPage() {
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
-    try {
-      const res = await teacherService.getAll();
-      setTeachers(res);
-    } catch (err) { console.error(err); }
+    try { setTeachers(await teacherService.getAll()); }
+    catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
 
@@ -59,18 +57,16 @@ export default function TeachersPage() {
             <TableRow>
               <TableCell>الاسم</TableCell>
               <TableCell>رقم التليفون</TableCell>
-              <TableCell>نوع الراتب</TableCell>
-              <TableCell>قيمة الراتب</TableCell>
+              <TableCell>التخصص</TableCell>
               <TableCell>الإجراءات</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {teachers.map((t) => (
+            {teachers.map((t: any) => (
               <TableRow key={t.id}>
                 <TableCell>{t.fullName}</TableCell>
                 <TableCell>{t.phone}</TableCell>
-                <TableCell>{t.salaryType}</TableCell>
-                <TableCell>{t.salaryAmount} ج.م</TableCell>
+                <TableCell>{t.specialization || '---'}</TableCell>
                 <TableCell>
                   <IconButton onClick={() => { setEditItem(t); setIsEditing(true); setOpen(true); }}><Edit /></IconButton>
                   <IconButton onClick={() => handleDelete(t.id)}><Delete /></IconButton>
@@ -78,7 +74,7 @@ export default function TeachersPage() {
               </TableRow>
             ))}
             {teachers.length === 0 && (
-              <TableRow><TableCell colSpan={5} sx={{ textAlign: 'center' }}>لا يوجد مدرسين</TableCell></TableRow>
+              <TableRow><TableCell colSpan={4} sx={{ textAlign: 'center' }}>لا يوجد مدرسين</TableCell></TableRow>
             )}
           </TableBody>
         </Table>
@@ -92,14 +88,8 @@ export default function TeachersPage() {
               onChange={(e) => setEditItem({ ...editItem, fullName: e.target.value })} dir="rtl" />
             <TextField label="رقم التليفون" value={editItem.phone || ''}
               onChange={(e) => setEditItem({ ...editItem, phone: e.target.value })} dir="rtl" />
-            <TextField label="الواتساب" value={editItem.whatsApp || ''}
-              onChange={(e) => setEditItem({ ...editItem, whatsApp: e.target.value })} dir="rtl" />
-            <TextField label="العنوان" value={editItem.address || ''}
-              onChange={(e) => setEditItem({ ...editItem, address: e.target.value })} dir="rtl" />
-            <TextField label="نوع الراتب" value={editItem.salaryType || ''}
-              onChange={(e) => setEditItem({ ...editItem, salaryType: e.target.value })} dir="rtl" />
-            <TextField label="قيمة الراتب" type="number" value={editItem.salaryAmount || ''}
-              onChange={(e) => setEditItem({ ...editItem, salaryAmount: parseFloat(e.target.value) })} />
+            <TextField label="التخصص" value={editItem.specialization || ''}
+              onChange={(e) => setEditItem({ ...editItem, specialization: e.target.value })} dir="rtl" />
           </Box>
         </DialogContent>
         <DialogActions>

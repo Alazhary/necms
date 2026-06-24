@@ -52,8 +52,8 @@ export default function ExamsPage() {
     if (!selectedExam) return;
     const grades = Object.entries(gradesData)
       .filter(([_, m]) => m)
-      .map(([studentId, marks]) => ({ studentId: parseInt(studentId), marks: parseFloat(marks) }));
-    await examService.enterGrades({ examId: selectedExam.id, grades });
+      .map(([studentId, marks]) => ({ exam_id: selectedExam.id, student_id: parseInt(studentId), score: parseFloat(marks) }));
+    await examService.enterGrades(grades);
     alert('تم حفظ الدرجات بنجاح');
   };
 

@@ -6,7 +6,7 @@ import {
   TableCell, TableContainer, TableHead, TableRow, Paper, Chip, Tabs, Tab, CircularProgress
 } from '@mui/material';
 import { School, Search } from '../icons';
-import axios from 'axios';
+import { supabase } from '../supabase';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -32,9 +32,25 @@ export default function PortalPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.get(`/api/portal/student/${studentCode}`);
-      setData(res.data);
-      setStudent(res.data.student);
+      const { data: studentData } = await supabase
+        .from('students')
+        .select('*, grades(name), attendance(*), exam_results(*), daily_follow_ups(*), weekly_follow_ups(*), monthly_follow_ups(*), notifications(*)')
+        .eq('student_code', studentCode)
+        .single();
+      if (!studentData) { throw new Error('الطالب غير موجود'); }
+      setStudent({
+        id: studentData.id,
+        fullName: studentData.full_name,
+        studentCode: studentData.student_code,
+        gradeName: studentData.grades?.name,
+      });
+      setData({
+        attendance: studentData.attendance,
+        exams: studentData.exam_results,
+        weeklyFollowUps: studentData.weekly_follow_ups,
+        monthlyFollowUps: studentData.monthly_follow_ups,
+        notifications: studentData.notifications,
+      });
     } catch {
       setError('الطالب غير موجود. تأكد من الكود المدخل.');
       setStudent(null);

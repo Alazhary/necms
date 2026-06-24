@@ -48,9 +48,9 @@ export default function AttendancePage() {
   const handleSave = async () => {
     const attendances = filteredStudents
       .filter(s => attendance[s.id])
-      .map(s => ({ studentId: s.id, status: attendance[s.id] || 'Present', notes: '' }));
+      .map(s => ({ student_id: s.id, date, status: attendance[s.id] || 'present', notes: '' }));
     if (attendances.length === 0) return;
-    await attendanceService.createBulk({ date: new Date(date), attendances });
+    await attendanceService.createBulk(attendances);
     alert('تم حفظ الحضور بنجاح');
   };
 

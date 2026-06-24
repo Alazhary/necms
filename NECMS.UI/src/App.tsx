@@ -4,6 +4,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import theme from './theme';
+import { CircularProgress, Box } from '@mui/material';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import StudentsPage from './pages/StudentsPage';
@@ -20,7 +21,8 @@ import MainLayout from './layouts/MainLayout';
 import './App.css';
 
 function PrivateRoute({ children, roles }: { children: React.JSX.Element; roles?: string[] }) {
-  const { isAuthenticated, hasRole } = useAuth();
+  const { isAuthenticated, hasRole, loading } = useAuth();
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}><CircularProgress /></Box>;
   if (!isAuthenticated) return <Navigate to="/login" />;
   if (roles && !hasRole(...roles)) return <Navigate to="/dashboard" />;
   return children;

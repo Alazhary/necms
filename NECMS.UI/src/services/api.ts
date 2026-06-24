@@ -1,27 +1,17 @@
-import axios from 'axios';
+import { supabase } from '../supabase';
 
-const api = axios.create({
-  baseURL: '/api',
-});
+export async function getCurrentUser() {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+export async function getProfile(userId: string) {
+  const { data } = await supabase
+    .from('profiles')
+    .select('*, roles(name)')
+    .eq('id', userId)
+    .single();
+  return data;
+}
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
-
-export default api;
+export default supabase;

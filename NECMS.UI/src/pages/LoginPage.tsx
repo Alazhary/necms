@@ -5,7 +5,7 @@ import { School } from '../icons';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,7 +17,7 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      await login(username, password);
+      await login(email, password);
       navigate('/dashboard');
     } catch {
       setError('فشل تسجيل الدخول. تأكد من اسم المستخدم وكلمة المرور.');
@@ -35,8 +35,8 @@ export default function LoginPage() {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>تسجيل الدخول</Typography>
           {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField fullWidth label="اسم المستخدم" value={username}
-              onChange={(e) => setUsername(e.target.value)} required dir="rtl" />
+            <TextField fullWidth label="البريد الإلكتروني" value={email}
+              onChange={(e) => setEmail(e.target.value)} required dir="rtl" />
             <TextField fullWidth label="كلمة المرور" type="password" value={password}
               onChange={(e) => setPassword(e.target.value)} required dir="rtl" />
             <Button type="submit" variant="contained" fullWidth disabled={loading}>

@@ -109,7 +109,7 @@ export default function StudentsPage() {
                 <TableCell>{s.gradeName}</TableCell>
                 <TableCell>{s.parentName}</TableCell>
                 <TableCell>
-                  <Chip label={s.status} color={s.status === 'Active' ? 'success' : 'default'} size="small" />
+                  <Chip label={s.status} color={s.status === 'نشط' ? 'success' : 'default'} size="small" />
                 </TableCell>
                 <TableCell>
                   <IconButton onClick={() => navigate(`/students/${s.id}`)}><Visibility /></IconButton>
@@ -138,7 +138,7 @@ export default function StudentsPage() {
               <InputLabel>الصف الدراسي</InputLabel>
               <Select value={editStudent.gradeId || ''} label="الصف الدراسي"
                 onChange={(e) => setEditStudent({ ...editStudent, gradeId: e.target.value })}>
-                {grades.map((g) => <MenuItem key={g.id} value={g.id}>{g.gradeName}</MenuItem>)}
+                  {grades.map((g) => <MenuItem key={g.id} value={g.id}>{g.name}</MenuItem>)}
               </Select>
             </FormControl>
             <TextField label="رقم التليفون" value={editStudent.phone || ''}
